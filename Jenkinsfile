@@ -49,37 +49,6 @@ node {
                     sh "docker tag ${PROJECT_NAME}-${md5Name}-container 375760062156.dkr.ecr.us-west-2.amazonaws.com/brands-data-api:${BRANCH_NAME}"
                     sh "docker push 375760062156.dkr.ecr.us-west-2.amazonaws.com/brands-data-api:${BRANCH_NAME}"
                 }
-                if (env.BRANCH_NAME == "develop") {
-                stage('TF apply on dev env') {
-                    dir('terraform/envs/dev'){
-                      sh "terraform init"
-                      sh "terraform plan"
-                      input "Deploy?"
-                      sh "terraform apply --auto-approve"
-                    }
-                }
-                } else if (env.BRANCH_NAME == "release-candidate") {
-                stage('TF apply on dev env') {
-                    dir('terraform/envs/rc'){
-                      sh "terraform init"
-                      sh "terraform plan"
-                      input "Deploy?"
-                      sh "terraform apply --auto-approve"
-                    }
-                }
-                }else if (env.BRANCH_NAME == "master") {
-                stage('TF apply on dev env') {
-                    dir('terraform/envs/prod'){
-                      sh "terraform init"
-                      sh "terraform plan"
-                      input "Deploy?"
-                      sh "terraform apply --auto-approve"
-                    }
-                }
-                }
-            }
-        }
-    }
     catch (exc) {
         echo "I failed, ${exc}"
         currentBuild.result = 'FAILURE'

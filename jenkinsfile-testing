@@ -1,0 +1,28 @@
+   // Uploading Docker images into AWS ECR
+ 40     stage('Pushing to ECR') {
+ 41      steps{
+ 42          script {
+ 43                         docker.withRegistry("https://" + REPOSITORY_URI, "ecr:${AWS_DEFAULT_REGION}:" + registryCredential) {
+ 44                         dockerImage.push()
+ 45                         }
+ 46          }
+ 47         }
+ 48       }
+ 49 
+ 50     stage('Deploy-test') {
+ 51      steps{
+ 52       sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS    _KEY}' && terraform init"
+ 53       sh "terraform plan"
+ 54                 }
+ 55             }
+ 56     stage('Deploy') {
+ 57     steps{
+ 58      sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS_    KEY}' && terraform apply"
+ 59 
+ 60     }
+ 61     }
+ 62         }
+ 63 
+ 64     }
+ 65 }*/
+

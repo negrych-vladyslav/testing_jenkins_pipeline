@@ -1,5 +1,6 @@
 pipeline {
     agent any
+
     environment {
         AWS_ACCOUNT_ID="075589242607"
         AWS_DEFAULT_REGION="eu-west-1"
@@ -12,19 +13,10 @@ pipeline {
         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
       AWS_ACCESS_KEY_ID = "AKIARDGLYJ3XVOFQYZIC"
       AWS_SECRET_ACCESS_KEY = "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"
-    stages {
-
-    // Tests
-    stage('Unit Tests') {
-      steps{
-        script {
-          sh 'npm install'
-	        sh 'npm test -- --watchAll=false'
-        }
-      }
     }
 
-    // Building Docker images
+    stages {
+
     stage('Building image') {
       steps{
         script {
@@ -33,7 +25,6 @@ pipeline {
       }
     }
 
-    // Uploading Docker images into AWS ECR
     stage('Pushing to ECR') {
      steps{
          script {
@@ -44,18 +35,11 @@ pipeline {
         }
       }
 
-    stage('Deploy-test') {
-     steps{
-      sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS_KEY}' && terraform init"
-      sh "terraform plan"
-                }
-            }
     stage('Deploy') {
     steps{
      sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS_KEY}' && terraform apply"
 
        }
       }
-    }
-  }
+   }
  }

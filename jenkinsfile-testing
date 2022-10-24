@@ -1,3 +1,15 @@
+AWS_ACCOUNT_ID="075589242607"
+  5         AWS_DEFAULT_REGION="eu-west-1"
+  6         CLUSTER_NAME="ecs-cluster"
+  7         SERVICE_NAME="ecs-service"
+  8         TASK_DEFINITION_NAME="ecs-task"
+  9         DESIRED_COUNT="1"
+ 10         IMAGE_REPO_NAME="node-app"
+ 11         IMAGE_TAG="${env.BUILD_ID}"
+ 12         REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+ 13       AWS_ACCESS_KEY_ID = "AKIARDGLYJ3XVOFQYZIC"
+ 14       AWS_SECRET_ACCESS_KEY = "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"
+
    // Uploading Docker images into AWS ECR
  40     stage('Pushing to ECR') {
  41      steps{

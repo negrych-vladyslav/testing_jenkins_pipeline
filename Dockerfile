@@ -1,27 +1,12 @@
-#Base Image node:12.18.4-alpine
-FROM node:12.18.4-alpine
+FROM node:16.14.2-alpine
 
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh python3 make
 
-#Set working directory to /app
-WORKDIR /app
-
-
-#Set PATH /app/node_modules/.bin
-ENV PATH /app/node_modules/.bin:$PATH
-
-
-#Copy package.json in the image
+WORKDIR /usr/src/app
+COPY .npmrc ./
 COPY package.json ./
-
-
-#Run npm install command
-RUN npm install
-
-
-#Copy the app
-COPY . ./
-
-EXPOSE 3000
-
-#Start the app
-CMD ["node", "./src/server.js"]
+RUN npm install --force
+COPY . .
+EXPOSE 8080
+CMD ["npm","run","start"]

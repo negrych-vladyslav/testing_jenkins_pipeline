@@ -1,63 +1,91 @@
-pipeline {
-    agent any
-    environment {
-        AWS_ACCOUNT_ID="075589242607"
-        AWS_DEFAULT_REGION="eu-west-1"
-	CLUSTER_NAME="ecs-cluster"
-	SERVICE_NAME="ecs-service"
-	TASK_DEFINITION_NAME="ecs-task"
-	DESIRED_COUNT="1"
-        IMAGE_REPO_NAME="node-app"
-        IMAGE_TAG="${env.BUILD_ID}"
-        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
-      AWS_ACCESS_KEY_ID = "AKIARDGLYJ3XVOFQYZIC"
-      AWS_SECRET_ACCESS_KEY = "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"
-    stages {
+#!groovy
 
-    // Tests
-    stage('Unit Tests') {
-      steps{
-        script {
-          sh 'npm install'
-	        sh 'npm test -- --watchAll=false'
-        }
-      }
-    }
+node {
+    def app
+    def md5Name = (sh (script: 'echo -n "${BRANCH_NAME}" | md5sum | awk \'{print $1}\'', returnStdout: true)).trim()
 
-    // Building Docker images
-    stage('Building image') {
-      steps{
-        script {
-          dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
-        }
-      }
-    }
+    env.PROJECT_NAME = 'brands-data-api'
 
-    // Uploading Docker images into AWS ECR
-    stage('Pushing to ECR') {
-     steps{
-         script {
-			docker.withRegistry("https://" + REPOSITORY_URI, "ecr:${AWS_DEFAULT_REGION}:" + registryCredential) {
-                    	dockerImage.push()
-                	}
-         }
-        }
-      }
-
-    stage('Deploy-test') {
-     steps{
-      sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS_KEY}' && terraform init"
-      sh "terraform plan"
+    try {
+        if (env.CHANGE_TITLE) {
+            stage('Check PR title') {
+                echo "PR title: ${CHANGE_TITLE}"
+                def matcher =  CHANGE_TITLE =~ /^(\[((.*)KLIC-(\d*)|Hotfix)\] (.{5,})|(Pre-release|Release)(.*))$/
+                if (matcher && matcher[0][1]) {
+                    echo "PR title is valid"
+                } else {
+                    error("PR title is not valid")
                 }
             }
-    stage('Deploy') {
-    steps{
-     sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS_KEY}' && terraform apply"
+        } else {
+            lock(resource: "${PROJECT_NAME}-${BRANCH_NAME}-deploy") {
+                stage('Clone repository') {
+                    checkout scm
+                }
 
-    }
-    }
+                stage ('Copy GitHub NPM registry') {
+                    sh "cp -a /var/lib/jenkins/klickly_configs/.npmrc ./.npmrc"
+                }
+
+                stage('Build image') {
+                    app = docker.build("${PROJECT_NAME}-${md5Name}-container")
+                }
+
+                app.inside {
+                    stage('Tests') {
+                        parallel (
+                            'Lints': {
+                                sh 'npm run test:eslint'
+                            },
+                            'Unit tests': {
+                                sh 'npm run test:mocha'
+                            }
+                        )
+                    }
+                }
+
+                stage('Login and push to ECR') {
+                    sh "eval \$(aws ecr get-login --registry-ids 375760062156 --region us-west-2 --no-include-email)"
+                    sh "docker tag ${PROJECT_NAME}-${md5Name}-container 375760062156.dkr.ecr.us-west-2.amazonaws.com/brands-data-api:${BRANCH_NAME}"
+                    sh "docker push 375760062156.dkr.ecr.us-west-2.amazonaws.com/brands-data-api:${BRANCH_NAME}"
+                }
+                if (env.BRANCH_NAME == "develop") {
+                stage('TF apply on dev env') {
+                    dir('terraform/envs/dev'){
+                      sh "terraform init"
+                      sh "terraform plan"
+                      input "Deploy?"
+                      sh "terraform apply --auto-approve"
+                    }
+                }
+                } else if (env.BRANCH_NAME == "release-candidate") {
+                stage('TF apply on dev env') {
+                    dir('terraform/envs/rc'){
+                      sh "terraform init"
+                      sh "terraform plan"
+                      input "Deploy?"
+                      sh "terraform apply --auto-approve"
+                    }
+                }
+                }else if (env.BRANCH_NAME == "master") {
+                stage('TF apply on dev env') {
+                    dir('terraform/envs/prod'){
+                      sh "terraform init"
+                      sh "terraform plan"
+                      input "Deploy?"
+                      sh "terraform apply --auto-approve"
+                    }
+                }
+                }
+            }
         }
-      }
-
+    }
+    catch (exc) {
+        echo "I failed, ${exc}"
+        currentBuild.result = 'FAILURE'
+    }
+    finally {
+        echo "I am ${currentBuild.result}. One way or another, I have finished";
+        deleteDir()
     }
 }

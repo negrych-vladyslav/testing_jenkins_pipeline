@@ -4,7 +4,6 @@ RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh python3 make
 
 WORKDIR /usr/src/app
-COPY .npmrc ./
 COPY package.json ./
 RUN npm install --force
 COPY . .

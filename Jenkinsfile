@@ -14,7 +14,7 @@ pipeline {
       AWS_SECRET_ACCESS_KEY = "cZgFPPxWa6/Y5ZrMynbwYhFqy0K0VSi+wpbSZouM"
     stages {
 
-    // Tests
+/*    // Tests
     stage('Unit Tests') {
       steps{
         script {
@@ -22,7 +22,7 @@ pipeline {
 	        sh 'npm test -- --watchAll=false'
         }
       }
-    }
+    }*/
 
     // Building Docker images
     stage('Building image') {
@@ -32,8 +32,11 @@ pipeline {
         }
       }
     }
+  }
+}
+}
 
-    // Uploading Docker images into AWS ECR
+/*    // Uploading Docker images into AWS ECR
     stage('Pushing to ECR') {
      steps{
          script {
@@ -60,4 +63,4 @@ pipeline {
       }
 
     }
-}
+}*/

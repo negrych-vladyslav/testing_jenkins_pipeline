@@ -6,12 +6,10 @@
     "author": "Klickly Inc",
     "license": "UNLICENSED",
     "scripts": {
-        "test:eslint": "./node_modules/.bin/eslint ./ --fix",
-        "test:mocha": "node_modules/mocha/bin/mocha --config mocharc.yml",
-        "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:mocha",
-        "test": "npm run test:eslint && npm run test:mocha",
-        "start": "./node_modules/pm2/bin/pm2-runtime start ./ecosystem.json",
-        "start-dev": "node index.js"
+      "test": "jest ./src/test",
+      "start": "PORT=8080 node src/server.js",
+      "build": "npm run-script build"
+
     },
     "husky": {
         "hooks": {

@@ -31,7 +31,7 @@
         "microservice"
     ],
     "dependencies": {
-//        "@klickly/back-utils": "1.0.0",
+        "@klickly/back-utils": "1.0.0",
         "@klickly/klickly-snowflake": "1.0.0",
         "@klickly/klicklyhq": "2.0.0",
         "@klickly/microservices-client": "1.0.1",

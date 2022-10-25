@@ -25,21 +25,5 @@ pipeline {
       }
     }
 
-    stage('Pushing to ECR') {
-     steps{
-         script {
-			docker.withRegistry("https://" + REPOSITORY_URI, "ecr:${AWS_DEFAULT_REGION}:" + registryCredential) {
-                    	dockerImage.push()
-                	}
-         }
-        }
-      }
-
-    stage('Deploy') {
-    steps{
-     sh "export TF_VAR_region='${AWS_DEFAULT_REGION}' && export TF_VAR_access_key='${AWS_ACCESS_KEY_ID}' && export TF_VAR_secret_key='${AWS_SECRET_ACCESS_KEY}' && terraform apply"
-
-       }
-      }
    }
  }

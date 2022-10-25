@@ -1,15 +1,63 @@
 {
-  "name": "nodejs-template-1.0",
-  "version": "1.0.0",
-  "description": "nodejs-template-1.0",
-  "main": "server.js",
-  "scripts": {
-    "test": "jest ./src/test",
-    "start": "PORT=3000 node src/server.js",
-    "build": "npm run-script build"
-  },
-  "dependencies": {
-    "jest": "^26.6.3",
-    "supertest": "^6.0.1"
-  }
+    "name": "klickly-brands-data-api",
+    "version": "1.0.0",
+    "description": "Brands data api",
+    "main": "index.js",
+    "author": "Klickly Inc",
+    "license": "UNLICENSED",
+    "scripts": {
+        "test:eslint": "./node_modules/.bin/eslint ./ --fix",
+        "test:mocha": "node_modules/mocha/bin/mocha --config mocharc.yml",
+        "test:coverage": "nyc --reporter=lcov --reporter=text-summary npm run test:mocha",
+        "test": "npm run test:eslint && npm run test:mocha",
+        "start": "./node_modules/pm2/bin/pm2-runtime start ./ecosystem.json",
+        "start-dev": "node index.js"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "npm test"
+        }
+    },
+    "eslintConfig": {
+        "extends": [
+            "eslint-config-klickly"
+        ],
+        "env": {
+            "mocha": true
+        }
+    },
+    "keywords": [
+        "klickly",
+        "microservice"
+    ],
+    "dependencies": {
+        "@klickly/back-utils": "1.0.0",
+        "@klickly/klickly-snowflake": "1.0.0",
+        "@klickly/klicklyhq": "2.0.0",
+        "@klickly/microservices-client": "1.0.1",
+        "@klickly/models-mongoose": "1.1.17",
+        "@klickly/queue-driver": "1.0.0",
+        "@klickly/shopify-client": "1.1.0",
+        "app": "file:app",
+        "async-busboy": "0.7.0",
+        "aws-sdk": "2.588.0",
+        "axios": "0.19.0",
+        "axios-retry": "3.1.9",
+        "bcrypt": "3.0.6",
+        "csvtojson": "2.0.10",
+        "jsondiffpatch": "0.3.11",
+        "moment": "2.24.0",
+        "moment-range": "4.0.2",
+        "pm2": "5.1.0",
+        "proxyquire": "2.1.3",
+        "qs": "6.9.1",
+        "stripe": "8.164.0",
+        "ua-parser-js": "0.7.28",
+        "uuid": "8.3.2",
+        "validator": "12.0.0",
+        "kafkajs": "1.15.0"
+    },
+    "devDependencies": {
+        "husky": "^3.0.4"
+    }
 }

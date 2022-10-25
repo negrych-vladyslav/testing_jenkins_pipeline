@@ -29,13 +29,6 @@
         "microservice"
     ],
     "dependencies": {
-        "@klickly/back-utils": "1.0.0",
-        "@klickly/klickly-snowflake": "1.0.0",
-        "@klickly/klicklyhq": "2.0.0",
-        "@klickly/microservices-client": "1.0.1",
-        "@klickly/models-mongoose": "1.1.17",
-        "@klickly/queue-driver": "1.0.0",
-        "@klickly/shopify-client": "1.1.0",
         "app": "file:app",
         "async-busboy": "0.7.0",
         "aws-sdk": "2.588.0",
